@@ -20,9 +20,13 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * Simple one-shot IPC mechanism. Essentially a one-place buffer that cannot be emptied once filled.
+ * 简单的一次性IPC机制。 基本上是一个缓冲区，一旦填满就不能清空。
+ * 从代码上来看其实就是一个Future对象
  */
 public class BlockingCell<T> {
-    /** Indicator of not-yet-filledness */
+    /** Indicator of not-yet-filledness
+     *  尚未填充满的标示
+     * */
     private boolean _filled = false;
 
     /** Will be null until a value is supplied, and possibly still then. */
@@ -40,6 +44,7 @@ public class BlockingCell<T> {
     /**
      * Wait for a value, and when one arrives, return it (without clearing it). If there's already a value present, there's no need to wait - the existing value
      * is returned.
+     * 一直等待，直到拿到响应数据之后调用set(T newValue)，设置值之后调用notifyAll()，此时get()不再阻塞。
      * @return the waited-for value
      *
      * @throws InterruptedException if this thread is interrupted
@@ -61,6 +66,7 @@ public class BlockingCell<T> {
      * @throws InterruptedException if this thread is interrupted
      */
     public synchronized T get(long timeout) throws InterruptedException, TimeoutException {
+        //如果设置为-1，则表示一直等待下去
         if (timeout == INFINITY) return get();
 
         if (timeout < 0) {
@@ -134,6 +140,7 @@ public class BlockingCell<T> {
 
     /**
      * Store a value in this BlockingCell, throwing AssertionError if the cell already has a value.
+     *
      * @param newValue the new value to store
      */
     public synchronized void set(T newValue) {

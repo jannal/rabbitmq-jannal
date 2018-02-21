@@ -18,6 +18,7 @@ package com.rabbitmq.client;
 
 /**
  * Interface to a container for an AMQP method-and-arguments, with optional content header and body.
+ * AMQP方法和参数的容器接口，带有可选的content header and body
  */
 public interface Command {
     /**

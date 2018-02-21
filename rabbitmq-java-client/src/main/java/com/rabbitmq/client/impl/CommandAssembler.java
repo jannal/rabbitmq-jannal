@@ -15,12 +15,12 @@
 
 package com.rabbitmq.client.impl;
 
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.UnexpectedFrameError;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.UnexpectedFrameError;
 
 /**
  * Class responsible for piecing together a command from a series of {@link Frame}s.
@@ -46,7 +46,7 @@ final class CommandAssembler {
 
     /** The fragments of this command's content body - a list of byte[] */
     private final List<byte[]> bodyN;
-    /** sum of the lengths of all fragments */
+    /** sum of the lengths of all fragments 所有内容帧body数组加起来的长度*/
     private int bodyLength;
 
     /** No bytes of content body not yet accumulated */
@@ -89,6 +89,7 @@ final class CommandAssembler {
 
     private void consumeMethodFrame(Frame f) throws IOException {
         if (f.type == AMQP.FRAME_METHOD) {
+            //如果是方法帧就读取方法帧payload中的流，这里的f.getInputStream()仅仅是payload，不包含帧头数据
             this.method = AMQImpl.readMethodFrom(f.getInputStream());
             this.state = this.method.hasContent() ? CAState.EXPECTING_CONTENT_HEADER : CAState.COMPLETE;
         } else {
@@ -98,6 +99,7 @@ final class CommandAssembler {
 
     private void consumeHeaderFrame(Frame f) throws IOException {
         if (f.type == AMQP.FRAME_HEADER) {
+            //内容头帧
             this.contentHeader = AMQImpl.readContentHeaderFrom(f.getInputStream());
             this.remainingBodyBytes = this.contentHeader.getBodySize();
             updateContentBodyState();
@@ -120,7 +122,9 @@ final class CommandAssembler {
         }
     }
 
-    /** Stitches together a fragmented content body into a single byte array */
+    /** Stitches together a fragmented content body into a single byte array
+     * 合并内容帧body数组
+     * */
     private byte[] coalesceContentBody() {
         if (this.bodyLength == 0) return EMPTY_BYTE_ARRAY;
         if (this.bodyN.size() == 1) return this.bodyN.get(0);

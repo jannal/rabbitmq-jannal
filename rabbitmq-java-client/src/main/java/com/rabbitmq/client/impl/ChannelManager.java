@@ -39,7 +39,9 @@ public class ChannelManager {
 
     /** Monitor for <code>_channelMap</code> and <code>channelNumberAllocator</code> */
     private final Object monitor = new Object();
-        /** Mapping from <code><b>1.._channelMax</b></code> to {@link ChannelN} instance */
+        /** Mapping from <code><b>1.._channelMax</b></code> to {@link ChannelN} instance
+         *
+         * */
         private final Map<Integer, ChannelN> _channelMap = new HashMap<Integer, ChannelN>();
         private final IntAllocator channelNumberAllocator;
 
@@ -47,7 +49,9 @@ public class ChannelManager {
 
     private final Set<CountDownLatch> shutdownSet = new HashSet<CountDownLatch>();
 
-    /** Maximum channel number available on this connection. */
+    /** Maximum channel number available on this connection.
+     * 如果最大的通道编号为0，则设置默认最大只为2^16-1
+     * */
     private final int _channelMax;
     private ExecutorService shutdownExecutor;
     private final ThreadFactory threadFactory;

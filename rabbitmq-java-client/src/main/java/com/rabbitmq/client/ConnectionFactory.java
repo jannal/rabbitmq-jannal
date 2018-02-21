@@ -67,6 +67,7 @@ public class ConnectionFactory implements Cloneable {
     /**
      * The default AMQP 0-9-1 connection handshake timeout. See DEFAULT_CONNECTION_TIMEOUT
      * for TCP (socket) connection timeout.
+     * AMQP 0-9-1 连接默认握手超时时间，默认TCP/IP连接超时时间为60s(DEFAULT_CONNECTION_TIMEOUT)
      */
     public static final int    DEFAULT_HANDSHAKE_TIMEOUT = 10000;
     /** The default shutdown timeout;
@@ -90,6 +91,7 @@ public class ConnectionFactory implements Cloneable {
     private int shutdownTimeout                   = DEFAULT_SHUTDOWN_TIMEOUT;
     private Map<String, Object> _clientProperties = AMQConnection.defaultClientProperties();
     private SocketFactory factory                 = SocketFactory.getDefault();
+    //默认认证机制是plain
     private SaslConfig saslConfig                 = DefaultSaslConfig.PLAIN;
     private ExecutorService sharedExecutor;
     private ThreadFactory threadFactory           = Executors.defaultThreadFactory();
@@ -99,15 +101,23 @@ public class ConnectionFactory implements Cloneable {
     private ScheduledExecutorService heartbeatExecutor;
     private SocketConfigurator socketConf         = new DefaultSocketConfigurator();
     private ExceptionHandler exceptionHandler     = new DefaultExceptionHandler();
-
+    //网络连接异常重连，默认true
     private boolean automaticRecovery             = true;
+    /**
+     *  设置为true会执行以下recovery
+     *      exchange的重新定义(不包含预定义的exchange)
+     *      queue的重新定义(不包含预定义的queue)
+     *      binding的重新定义(不包含预定义的binding)
+     */
+
     private boolean topologyRecovery              = true;
 
     // long is used to make sure the users can use both ints
     // and longs safely. It is unlikely that anybody'd need
     // to use recovery intervals > Integer.MAX_VALUE in practice.
+    //每隔5秒重试一次（网络连接异常时）
     private long networkRecoveryInterval          = 5000;
-
+    //metrics收集器
     private MetricsCollector metricsCollector;
 
     private boolean nio = false;
@@ -881,10 +891,13 @@ public class ConnectionFactory implements Cloneable {
     public Connection newConnection(ExecutorService executor, AddressResolver addressResolver, String clientProvidedName)
         throws IOException, TimeoutException {
         if(this.metricsCollector == null) {
+            //这是一个空的收集，没有任何操作，还有一个StandardMetricsCollector标准收集器
             this.metricsCollector = new NoOpMetricsCollector();
         }
         // make sure we respect the provided thread factory
+        //根据参数创建FrameHandlerFactory，BIO和NIO
         FrameHandlerFactory fhFactory = createFrameHandlerFactory();
+        //此executor是用于消费者消费使用的(consumerWorkServiceExecutor)
         ConnectionParams params = params(executor);
         // set client-provided via a client property
         if (clientProvidedName != null) {
@@ -892,7 +905,7 @@ public class ConnectionFactory implements Cloneable {
             properties.put("connection_name", clientProvidedName);
             params.setClientProperties(properties);
         }
-
+        //默认自动恢复连接
         if (isAutomaticRecoveryEnabled()) {
             // see com.rabbitmq.client.impl.recovery.RecoveryAwareAMQConnectionFactory#newConnection
             AutorecoveringConnection conn = new AutorecoveringConnection(params, fhFactory, addressResolver, metricsCollector);

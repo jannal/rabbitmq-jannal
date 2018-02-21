@@ -18,13 +18,8 @@ package com.rabbitmq.client.impl;
 
 import com.rabbitmq.client.AMQP;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.ScheduledFuture;
 import java.io.IOException;
+import java.util.concurrent.*;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 
@@ -57,6 +52,10 @@ final class HeartbeatSender {
         this.threadFactory = threadFactory;
     }
 
+    /**
+     * 当wirteFrame之后调用此方法，更新最新的最后一个活动时间
+     * 参见AMQConnection的writeFrame(Frame f)方法
+     */
     public void signalActivity() {
         this.lastActivityTime = System.nanoTime();
     }
@@ -136,6 +135,11 @@ final class HeartbeatSender {
                 long now = System.nanoTime();
 
                 if (now > (lastActivityTime + this.heartbeatNanos)) {
+                    /**
+                     *  向socket中写入一个心跳帧，因为子类SocketFrameHandler的writeFrame是线程安全的(对于同一个socket来说)
+                     *  心跳帧的通道编号是0
+                     */
+
                     frameHandler.writeFrame(new Frame(AMQP.FRAME_HEARTBEAT, 0));
                     frameHandler.flush();
                 }

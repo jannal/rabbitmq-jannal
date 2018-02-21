@@ -15,12 +15,12 @@
 
 package com.rabbitmq.client.impl;
 
+import com.rabbitmq.client.AMQP;
+import com.rabbitmq.client.Command;
+
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
-import com.rabbitmq.client.AMQP;
-import com.rabbitmq.client.Command;
 
 /**
  * AMQP 0-9-1-specific implementation of {@link Command} which accumulates
@@ -107,7 +107,7 @@ public class AMQCommand implements Command {
 
                 connection.writeFrame(this.assembler.getContentHeader()
                         .toFrame(channelNumber, body.length));
-
+                //如果body长度超过client与server协商出的最大帧长度，将分多个Frame发送
                 int frameMax = connection.getFrameMax();
                 int bodyPayloadMax = (frameMax == 0) ? body.length : frameMax
                         - EMPTY_FRAME_SIZE;

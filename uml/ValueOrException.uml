@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.rabbitmq.utility.ValueOrException</OriginalElement>
+  <nodes>
+    <node x="340.0" y="0.0">java.lang.Throwable</node>
+    <node x="305.5" y="80.0">com.rabbitmq.utility.ValueOrException</node>
+    <node x="145.0" y="0.0">com.rabbitmq.utility.SensibleClone</node>
+    <node x="72.5" y="80.0">com.rabbitmq.utility.BlockingValueOrException</node>
+    <node x="0.0" y="0.0">com.rabbitmq.utility.BlockingCell</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.rabbitmq.utility.BlockingValueOrException" target="java.lang.Throwable">
+      <point x="71.0" y="-15.0" />
+      <point x="250.0" y="60.0" />
+      <point x="368.5" y="60.0" />
+      <point x="-28.5" y="15.0" />
+    </edge>
+    <edge source="com.rabbitmq.utility.ValueOrException" target="com.rabbitmq.utility.SensibleClone">
+      <point x="-40.0" y="-15.0" />
+      <point x="345.5" y="50.0" />
+      <point x="247.0" y="50.0" />
+      <point x="34.0" y="15.0" />
+    </edge>
+    <edge source="com.rabbitmq.utility.ValueOrException" target="java.lang.Throwable">
+      <point x="40.0" y="-15.0" />
+      <point x="28.5" y="15.0" />
+    </edge>
+    <edge source="com.rabbitmq.utility.BlockingValueOrException" target="com.rabbitmq.utility.SensibleClone">
+      <point x="0.0" y="-15.0" />
+      <point x="-34.0" y="15.0" />
+    </edge>
+    <edge source="com.rabbitmq.utility.BlockingValueOrException" target="com.rabbitmq.utility.BlockingCell">
+      <point x="-71.0" y="-15.0" />
+      <point x="108.0" y="60.0" />
+      <point x="62.5" y="60.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="135.0" y="55.0" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

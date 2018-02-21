@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.rabbitmq.client.impl.recovery.AutorecoveringConnection</OriginalElement>
+  <nodes>
+    <node x="573.625" y="160.0">com.rabbitmq.client.Recoverable</node>
+    <node x="205.75" y="320.0">com.rabbitmq.client.impl.AMQConnection</node>
+    <node x="287.25" y="80.0">java.io.Closeable</node>
+    <node x="296.375" y="240.0">com.rabbitmq.client.impl.NetworkConnection</node>
+    <node x="400.0833333333333" y="320.0">com.rabbitmq.client.impl.recovery.AutorecoveringConnection</node>
+    <node x="251.0" y="160.0">com.rabbitmq.client.Connection</node>
+    <node x="0.0" y="160.0">com.rabbitmq.client.impl.ShutdownNotifierComponent</node>
+    <node x="489.375" y="240.0">com.rabbitmq.client.RecoverableConnection</node>
+    <node x="272.25" y="0.0">java.lang.AutoCloseable</node>
+    <node x="75.75" y="80.0">com.rabbitmq.client.ShutdownNotifier</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.rabbitmq.client.impl.recovery.AutorecoveringConnection" target="com.rabbitmq.client.RecoverableConnection">
+      <point x="54.0" y="-15.0" />
+      <point x="562.0833333333333" y="295.0" />
+      <point x="586.875" y="295.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.rabbitmq.client.impl.recovery.AutorecoveringConnection" target="com.rabbitmq.client.impl.NetworkConnection">
+      <point x="-54.0" y="-15.0" />
+      <point x="454.0833333333333" y="295.0" />
+      <point x="426.125" y="295.0" />
+      <point x="43.25" y="15.0" />
+    </edge>
+    <edge source="com.rabbitmq.client.impl.AMQConnection" target="com.rabbitmq.client.Connection">
+      <point x="0.0" y="-15.0" />
+      <point x="-30.25" y="15.0" />
+    </edge>
+    <edge source="com.rabbitmq.client.RecoverableConnection" target="com.rabbitmq.client.Recoverable">
+      <point x="48.75" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.rabbitmq.client.impl.AMQConnection" target="com.rabbitmq.client.impl.NetworkConnection">
+      <point x="50.333333333333314" y="-15.0" />
+      <point x="331.5833333333333" y="295.0" />
+      <point x="339.625" y="295.0" />
+      <point x="-43.25" y="15.0" />
+    </edge>
+    <edge source="com.rabbitmq.client.impl.AMQConnection" target="com.rabbitmq.client.impl.ShutdownNotifierComponent">
+      <point x="-50.33333333333337" y="-15.0" />
+      <point x="230.91666666666663" y="295.0" />
+      <point x="115.5" y="295.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.rabbitmq.client.Connection" target="com.rabbitmq.client.ShutdownNotifier">
+      <point x="-30.25" y="-15.0" />
+      <point x="281.25" y="135.0" />
+      <point x="195.0" y="135.0" />
+      <point x="39.75" y="15.0" />
+    </edge>
+    <edge source="com.rabbitmq.client.RecoverableConnection" target="com.rabbitmq.client.Connection">
+      <point x="-48.75" y="-15.0" />
+      <point x="538.125" y="215.0" />
+      <point x="341.75" y="215.0" />
+      <point x="30.25" y="15.0" />
+    </edge>
+    <edge source="java.io.Closeable" target="java.lang.AutoCloseable">
+      <point x="0.0" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+    <edge source="com.rabbitmq.client.impl.ShutdownNotifierComponent" target="com.rabbitmq.client.ShutdownNotifier">
+      <point x="0.0" y="-15.0" />
+      <point x="-39.75" y="15.0" />
+    </edge>
+    <edge source="com.rabbitmq.client.Connection" target="java.io.Closeable">
+      <point x="30.25" y="-15.0" />
+      <point x="0.0" y="15.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="350.0" y="175.0" />
+  <SelectedNodes />
+  <Categories />
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

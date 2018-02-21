@@ -16,6 +16,7 @@
 package com.rabbitmq.client.impl;
 
 import com.rabbitmq.client.AMQP;
+import com.sun.xml.internal.bind.v2.TODO;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -29,7 +30,6 @@ import java.util.concurrent.TimeUnit;
 /**
  * A socket-based frame handler.
  */
-
 public class SocketFrameHandler implements FrameHandler {
     /** The underlying socket */
     private final Socket _socket;
@@ -130,7 +130,7 @@ public class SocketFrameHandler implements FrameHandler {
      * Write a 0-9-1-style connection header to the underlying socket,
      * containing the specified version information, kickstarting the
      * AMQP protocol version negotiation process.
-     *
+     * 发送一个'AMQP0091'的协议头
      * @param major major protocol version number
      * @param minor minor protocol version number
      * @param revision protocol revision number
@@ -179,9 +179,16 @@ public class SocketFrameHandler implements FrameHandler {
 
     @Override
     public void close() {
+        //延迟等待SOCKET_CLOSING_TIMEOUT=1s关闭连接，1s后剩余未发送的数据会被丢弃
         try { _socket.setSoLinger(true, SOCKET_CLOSING_TIMEOUT); } catch (Exception _e) {}
         // async flush if possible
         // see https://github.com/rabbitmq/rabbitmq-java-client/issues/194
+        /**
+         * TODO 此处用途还需要思考一下，避免socket写阻塞的原因，以及为什么通过开启线程来避免死锁？？？？ by jannal
+         * 有时间再看看比人遇见的问题:
+         * http://rabbitmq.1065348.n5.nabble.com/Long-timeout-if-server-host-becomes-unreachable-td30275.html
+          */
+
         Callable<Void> flushCallable = new Callable<Void>() {
             @Override
             public Void call() throws Exception {

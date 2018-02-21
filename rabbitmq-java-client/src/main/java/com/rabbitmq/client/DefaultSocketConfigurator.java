@@ -33,6 +33,13 @@ public class DefaultSocketConfigurator implements SocketConfigurator {
     @Override
     public void configure(Socket socket) throws IOException {
         // disable Nagle's algorithm, for more consistently low latency
+        /**
+         * 禁用Nagle算法，默认这里只是设置了一个socket选项，我们完全可以自己定义自己想要设置的socket选项
+         * 传输给ConnectionFactory。比如我们可以设置SO_LINGER选项来进行延迟关闭连接.事实上在SocketFrameHandler类
+         * 中close方法就设置了setSoLinger();
+         */
+
+
         socket.setTcpNoDelay(true);
     }
 }

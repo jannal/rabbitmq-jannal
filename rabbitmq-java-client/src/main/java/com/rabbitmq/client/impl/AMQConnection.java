@@ -51,9 +51,11 @@ public class AMQConnection extends ShutdownNotifierComponent implements Connecti
     // the heartbeat one, so we use a value of 105% of the effective heartbeat timeout
     public static final double CHANNEL_SHUTDOWN_TIMEOUT_MULTIPLIER = 1.05;
 
+    //消费者线程执行器
     private final ExecutorService consumerWorkServiceExecutor;
     private final ScheduledExecutorService heartbeatExecutor;
     private final ExecutorService shutdownExecutor;
+    //主循环线程
     private Thread mainLoopThread;
     private ThreadFactory threadFactory = Executors.defaultThreadFactory();
     private String id;
@@ -261,15 +263,27 @@ public class AMQConnection extends ShutdownNotifierComponent implements Connecti
      * will be thrown if the broker closes the connection with ACCESS_REFUSED.
      * If an exception is thrown, connection resources allocated can all be
      * garbage collected when the connection object is no longer referenced.
+     *
+     *
+     * client收到Connection.Tune方法后，必须要开始发送心跳,
+     * 并在收到Connection.Open后，必须要开始监控.server在收到Connection.Tune-Ok后，
+     * 需要开始发送和监控心跳．
      */
     public void start()
             throws IOException, TimeoutException {
+        //创建Consumer服务
         initializeConsumerWorkService();
+        //创建长连接心跳
         initializeHeartbeatSender();
+        //判断主循环是否在运行中
         this._running = true;
         // Make sure that the first thing we do is to send the header,
         // which should cause any socket errors to show up for us, rather
         // than risking them pop out in the MainLoop
+
+        /**
+         * 先发送header，确保socket是否会发生错误，比在MainLoop(主事件循环)去确保要好。
+         */
         AMQChannel.SimpleBlockingRpcContinuation connStartBlocker =
             new AMQChannel.SimpleBlockingRpcContinuation();
         // We enqueue an RPC continuation here without sending an RPC
@@ -282,11 +296,16 @@ public class AMQConnection extends ShutdownNotifierComponent implements Connecti
             // The following two lines are akin to AMQChannel's
             // transmit() method for this pseudo-RPC.
             _frameHandler.setTimeout(handshakeTimeout);
+            //发送一个协议头开始新的连接，格式为'AMQP0091'
             _frameHandler.sendHeader();
         } catch (IOException ioe) {
             _frameHandler.close();
             throw ioe;
         }
+        /**
+         * 此处就是启动MainLoop(源码是 connection.startMainLoop())
+         * 把连接启动放入到framehandler的  initialize()方法中，这样的设计是否合理??
+         */
 
         this._frameHandler.initialize(this);
 
@@ -306,7 +325,7 @@ public class AMQConnection extends ShutdownNotifierComponent implements Connecti
                 throw new ProtocolVersionMismatchException(clientVersion,
                                                                   serverVersion);
             }
-
+            //mechanisms(机制),返回的数据形如:AMQPLAIN PLAIN
             String[] mechanisms = connStart.getMechanisms().toString().split(" ");
             SaslMechanism sm = this.saslConfig.getSaslMechanism(mechanisms);
             if (sm == null) {
@@ -318,6 +337,7 @@ public class AMQConnection extends ShutdownNotifierComponent implements Connecti
             LongString response = sm.handleChallenge(null, this.username, this.password);
 
             do {
+                //构建Start-OK(认证机制)
                 Method method = (challenge == null)
                                         ? new AMQP.Connection.StartOk.Builder()
                                                   .clientProperties(_clientProperties)
@@ -357,27 +377,35 @@ public class AMQConnection extends ShutdownNotifierComponent implements Connecti
         }
 
         try {
+            //协商通道最大编号,协商规则如下
+            // (clientValue == 0 || serverValue == 0) ?Math.max(clientValue, serverValue) :Math.min(clientValue, serverValue);
             int channelMax =
                 negotiateChannelMax(this.requestedChannelMax,
                                     connTune.getChannelMax());
+            //创建通道管理器
             _channelManager = instantiateChannelManager(channelMax, threadFactory);
 
+            //协商Frame的最大长度
             int frameMax =
                 negotiatedMaxValue(this.requestedFrameMax,
                                    connTune.getFrameMax());
             this._frameMax = frameMax;
 
+            //协商出心跳时间
             int heartbeat =
                 negotiatedMaxValue(this.requestedHeartbeat,
                                    connTune.getHeartbeat());
 
+            //发送心跳
             setHeartbeat(heartbeat);
 
+            //发送TuneOk
             _channel0.transmit(new AMQP.Connection.TuneOk.Builder()
                                 .channelMax(channelMax)
                                 .frameMax(frameMax)
                                 .heartbeat(heartbeat)
                               .build());
+            //发送Open打开连接
             _channel0.exnWrappingRpc(new AMQP.Connection.Open.Builder()
                                       .virtualHost(_virtualHost)
                                     .build());
@@ -456,6 +484,7 @@ public class AMQConnection extends ShutdownNotifierComponent implements Connecti
      */
     public void setHeartbeat(int heartbeat) {
         try {
+            //发送心跳（内部开启了一个发送心跳线程）
             _heartbeatSender.setHeartbeat(heartbeat);
             _heartbeat = heartbeat;
 
@@ -569,7 +598,7 @@ public class AMQConnection extends ShutdownNotifierComponent implements Connecti
             try {
                 while (_running) {
                     Frame frame = _frameHandler.readFrame();
-                    readFrame(frame);
+                        readFrame(frame);
                 }
             } catch (Throwable ex) {
                 handleFailure(ex);

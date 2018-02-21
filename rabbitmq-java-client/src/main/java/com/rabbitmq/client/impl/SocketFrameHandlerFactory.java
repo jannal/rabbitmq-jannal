@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 public class SocketFrameHandlerFactory extends AbstractFrameHandlerFactory {
 
     private final SocketFactory factory;
+    //用于关闭socket的线程池
     private final ExecutorService shutdownExecutor;
 
     public SocketFrameHandlerFactory(int connectionTimeout, SocketFactory factory, SocketConfigurator configurator, boolean ssl) {
@@ -45,8 +46,11 @@ public class SocketFrameHandlerFactory extends AbstractFrameHandlerFactory {
         int portNumber = ConnectionFactory.portOrDefault(addr.getPort(), ssl);
         Socket socket = null;
         try {
+            //通过socketFactory创建Socket
             socket = factory.createSocket();
+            //设置socket选项
             configurator.configure(socket);
+            //开启连接
             socket.connect(new InetSocketAddress(hostName, portNumber),
                     connectionTimeout);
             return create(socket);

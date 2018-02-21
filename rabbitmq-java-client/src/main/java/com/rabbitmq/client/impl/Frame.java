@@ -35,15 +35,19 @@ public class Frame {
     /** Frame type code */
     public final int type;
 
-    /** Frame channel number, 0-65535 */
+    /** Frame channel number, 0-65535 通道编号，一个TCPIP连接，多个通道，每个通道都有自己的编号*/
     public final int channel;
 
-    /** Frame payload bytes (for inbound frames) */
+    /** Frame payload bytes (for inbound frames) 有效载荷,就是除了协议头之外的内容*/
     private final byte[] payload;
 
-    /** Frame payload (for outbound frames) */
+    /** Frame payload (for outbound frames) 字节流的累加器，用于*/
     private final ByteArrayOutputStream accumulator;
 
+    /**
+     * 自定义协议都是 【协议头】+【协议体】,NON_BODY_SIZE指的是没有协议体内容的情况下最小的传输
+     * 长度。从这里可以看出【协议头】=type(1B)+channel(2B)+payloadSize(4B)+1(1B),总共占用8B(8个字节)
+     */
     private static final int NON_BODY_SIZE = 1 /* type */ + 2 /* channel */ + 4 /* payload size */ + 1 /* end character */;
 
     /**
@@ -88,6 +92,7 @@ public class Frame {
         int channel;
 
         try {
+            //读取1B
             type = is.readUnsignedByte();
         } catch (SocketTimeoutException ste) {
             // System.err.println("Timed out waiting for a frame.");
@@ -102,17 +107,27 @@ public class Frame {
             /*
              * Otherwise meaningless, so try to read the version,
              * and throw an exception, whether we read the version
-             * okay or not.
+             * okay or not.检查协议版本
              */
             protocolVersionMismatch(is);
         }
-
+        //读取2B
         channel = is.readUnsignedShort();
+        //读取4B
         int payloadSize = is.readInt();
+        //构造存放内容的字节数组
         byte[] payload = new byte[payloadSize];
+        /**
+         *  readFully数据缓冲区的空间还有剩余时会阻塞等待读取，直到装满。
+         *  此处不能使用is.read(payload),
+         *  read(byte[] b)一直阻塞等待读取字节，直到字节流中的数据已经全部读完。
+         *  而readFully(byte[] b)是当数据缓冲区的空间还有剩余时会阻塞等待读取，直到装满。
+         */
+
         is.readFully(payload);
 
         int frameEndMarker = is.readUnsignedByte();
+        //如果读取完body之后最后一个字节不是结束帧，就代表数据格式不正确，以此来判断Frame的正确性
         if (frameEndMarker != AMQP.FRAME_END) {
             throw new MalformedFrameException("Bad frame end marker: " + frameEndMarker);
         }

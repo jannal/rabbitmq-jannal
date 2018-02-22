@@ -32,10 +32,13 @@ import java.util.List;
 final class CommandAssembler {
     private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
-    /** Current state, used to decide how to handle each incoming frame. */
+    /** Current state, used to decide how to handle each incoming frame.
+     * 当前状态，用于决定如何处理每个传入的帧，不过这个名字取名CAState真的好吗????(哈哈)
+     * */
     private enum CAState {
         EXPECTING_METHOD, EXPECTING_CONTENT_HEADER, EXPECTING_CONTENT_BODY, COMPLETE
     }
+    //
     private CAState state;
 
     /** The method for this command */
@@ -151,6 +154,7 @@ final class CommandAssembler {
     }
 
     /**
+     * 处理Frame,根据当前的状态获取相关的Frame
      * @param f frame to be incorporated
      * @return true if command becomes complete
      * @throws IOException if error reading frame

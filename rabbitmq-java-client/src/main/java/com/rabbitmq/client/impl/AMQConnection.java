@@ -53,11 +53,14 @@ public class AMQConnection extends ShutdownNotifierComponent implements Connecti
 
     //消费者线程执行器
     private final ExecutorService consumerWorkServiceExecutor;
+
+    //心跳线程执行器
     private final ScheduledExecutorService heartbeatExecutor;
     private final ExecutorService shutdownExecutor;
     //主循环线程
     private Thread mainLoopThread;
     private ThreadFactory threadFactory = Executors.defaultThreadFactory();
+    //连接的唯一标识ID(不一定是客户端分配)
     private String id;
 
     private final List<RecoveryCanBeginListener> recoveryCanBeginListeners =
@@ -97,6 +100,11 @@ public class AMQConnection extends ShutdownNotifierComponent implements Connecti
 
     /** The special channel 0 (<i>not</i> managed by the <code><b>_channelManager</b></code>) */
     private final AMQChannel _channel0 = new AMQChannel(this, 0) {
+        /**
+         * _channel0这是一个特殊的通道，通道编号为0，专门用于处于Connection Close/Blocked/Unblocked等事件
+         * 从processControlCommand可以看到
+         */
+
         @Override public boolean processAsync(Command c) throws IOException {
             return getConnection().processControlCommand(c);
         }
@@ -585,6 +593,9 @@ public class AMQConnection extends ShutdownNotifierComponent implements Connecti
             Math.min(clientValue, serverValue);
     }
 
+    /**
+     * 循环从TCP连接中读取输入流，如果没有就阻塞等待
+     */
     private class MainLoop implements Runnable {
 
         /**

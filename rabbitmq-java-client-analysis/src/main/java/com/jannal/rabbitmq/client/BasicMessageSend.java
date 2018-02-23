@@ -25,12 +25,12 @@ public class BasicMessageSend {
         Connection conn =null;
         try {
             conn = factory.newConnection();
-            //Channel channel = conn.createChannel();
+            Channel channel = conn.createChannel();
             //channel.exchangeDeclare("jannal.exchange", "topic", true);
             //String queueName = channel.queueDeclare().getQueue();
-            //channel.queueBind("jannal.queue", "jannal.exchange", "*.#");
+            channel.queueBind("jannal.queue", "jannal.exchange", "*.#");
             byte[] messageBodyBytes = "Hello, world!".getBytes();
-            //channel.basicPublish("jannal.exchange", "*.#", null, messageBodyBytes);
+            channel.basicPublish("jannal.exchange", "*.#", null, messageBodyBytes);
 
         } catch (IOException e) {
             e.printStackTrace();

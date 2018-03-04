@@ -30,6 +30,9 @@ import java.util.Set;
  * <h2>Concurrent Semantics</h2>
  * This implementation is <i>not</i> thread-safe.
  * @param <T> type of elements in the queue
+ *
+ * 这是一个Set队列，即队列元素只能出现一次，本质上队列还是通过LinkedList实现，
+ * 只不过同时通过一个Set来判断是否已经有元素
  */
 public class SetQueue<T> {
     private final Set<T> members = new HashSet<T>();

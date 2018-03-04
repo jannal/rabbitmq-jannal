@@ -51,13 +51,14 @@ import java.util.Set;
  * @param <W> Work -- type of work item
  */
 public class WorkPool<K, W> {
+    //默认最大队列长度
     private static final int MAX_QUEUE_LENGTH = 1000;
 
-    /** An injective queue of <i>ready</i> clients. */
+    /** An injective queue of <i>ready</i> clients. 就绪队列*/
     private final SetQueue<K> ready = new SetQueue<K>();
-    /** The set of clients which have work <i>in progress</i>. */
+    /** The set of clients which have work <i>in progress</i>. 正在处理的client集合*/
     private final Set<K> inProgress = new HashSet<K>();
-    /** The pool of registered clients, with their work queues. */
+    /** The pool of registered clients, with their work queues. 保存注册的Channel与处理的任务队列 */
     private final Map<K, VariableLinkedBlockingQueue<W>> pool = new HashMap<K, VariableLinkedBlockingQueue<W>>();
     /** Those keys which want limits to be removed. We do not limit queue size if this is non-empty. */
     private final Set<K> unlimited = new HashSet<K>();
@@ -134,8 +135,10 @@ public class WorkPool<K, W> {
      */
     public K nextWorkBlock(Collection<W> to, int size) {
         synchronized (this) {
+            //从就绪队列中取出一个Channel
             K nextKey = readyToInProgress();
             if (nextKey != null) {
+                //获取Channel对应的任务队列
                 VariableLinkedBlockingQueue<W> queue = this.pool.get(nextKey);
                 drainTo(queue, to, size);
             }
@@ -228,6 +231,12 @@ public class WorkPool<K, W> {
     private boolean isInProgress(K key){ return this.inProgress.contains(key); }
     private boolean isReady(K key){ return this.ready.contains(key); }
     private boolean isRegistered(K key) { return this.pool.containsKey(key); }
+
+    /**
+     * 是否休眠状态
+     * @param key
+     * @return
+     */
     private boolean isDormant(K key){ return !isInProgress(key) && !isReady(key) && isRegistered(key); }
 
     /* State transition methods - all assume key registered */

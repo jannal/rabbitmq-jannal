@@ -16,7 +16,6 @@
 package com.rabbitmq.client.impl;
 
 import com.rabbitmq.client.AMQP;
-import com.sun.xml.internal.bind.v2.TODO;
 
 import java.io.*;
 import java.net.InetAddress;

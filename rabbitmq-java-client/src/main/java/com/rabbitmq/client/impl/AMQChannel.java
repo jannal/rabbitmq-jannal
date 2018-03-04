@@ -44,10 +44,10 @@ public abstract class AMQChannel extends ShutdownNotifierComponent {
      */
     protected final Object _channelMutex = new Object();
 
-    /** The connection this channel is associated with. */
+    /** The connection this channel is associated with. 通道所在的连接对象*/
     private final AMQConnection _connection;
 
-    /** This channel's channel number. */
+    /** This channel's channel number. 通道编号*/
     private final int _channelNumber;
 
     /** Command being assembled */
@@ -170,6 +170,10 @@ public abstract class AMQChannel extends ShutdownNotifierComponent {
         }
     }
 
+    /**
+     * 是否是未完成的
+     * @return
+     */
     public boolean isOutstandingRpc()
     {
         synchronized (_channelMutex) {
@@ -249,6 +253,7 @@ public abstract class AMQChannel extends ShutdownNotifierComponent {
     public void quiescingRpc(Method m, RpcContinuation k)
         throws IOException
     {
+        //通道互斥锁
         synchronized (_channelMutex) {
             enqueueRpc(k);
             quiescingTransmit(m);
@@ -351,6 +356,7 @@ public abstract class AMQChannel extends ShutdownNotifierComponent {
         public final BlockingValueOrException<T, ShutdownSignalException> _blocker =
             new BlockingValueOrException<T, ShutdownSignalException>();
 
+        //将响应的结果存入到Future对象中(BlockingCell)
         @Override
         public void handleCommand(AMQCommand command) {
             _blocker.setValue(transformReply(command));
@@ -371,7 +377,7 @@ public abstract class AMQChannel extends ShutdownNotifierComponent {
         {
             return _blocker.uninterruptibleGetValue(timeout);
         }
-
+        //获取响应的结果
         public abstract T transformReply(AMQCommand command);
     }
 

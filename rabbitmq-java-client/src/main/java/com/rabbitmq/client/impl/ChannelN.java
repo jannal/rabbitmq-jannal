@@ -1218,6 +1218,13 @@ public class ChannelN extends AMQChannel implements com.rabbitmq.client.Channel 
         return basicConsume(queue, autoAck, consumerTag, false, false, null, callback);
     }
 
+    /**
+     * 1.启动消费者，调用消费者的handlerConsumerOk
+     * 2.queue 队列名称
+     * 3. autoAck 自动ack
+     * 4.consumerTag 不同的订阅采用Consumer Tag作为区分，在同一个Channel中的Consumer也需要通过唯一的Consumer tag以区分
+     * 5. Consumer 回调接口
+     */
     /** Public API - {@inheritDoc} */
     @Override
     public String basicConsume(String queue, final boolean autoAck, String consumerTag,
@@ -1225,15 +1232,18 @@ public class ChannelN extends AMQChannel implements com.rabbitmq.client.Channel 
                                final Consumer callback)
         throws IOException
     {
+        //Future泛型对象是一个actualConsumerTag
         BlockingRpcContinuation<String> k = new BlockingRpcContinuation<String>() {
             @Override
             public String transformReply(AMQCommand replyCommand) {
                 String actualConsumerTag = ((Basic.ConsumeOk) replyCommand.getMethod()).getConsumerTag();
+                //保存consumerTag与Consumer的关联
                 _consumers.put(actualConsumerTag, callback);
 
                 // need to register consumer in stats before it actually starts consuming
                 metricsCollector.basicConsume(ChannelN.this, actualConsumerTag, autoAck);
 
+                //分发器，启动线程进行消费
                 dispatcher.handleConsumeOk(callback, actualConsumerTag);
                 return actualConsumerTag;
             }

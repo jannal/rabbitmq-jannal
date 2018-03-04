@@ -44,12 +44,17 @@ public class StandardMetricsCollector implements MetricsCollector {
     private final ConcurrentMap<String, ConnectionState> connectionState = new ConcurrentHashMap<String, ConnectionState>();
 
     private final MetricRegistry registry;
-
+    //打开的连接数
     private final Counter connections;
+    //打开的通道数
     private final Counter channels;
+    //已经发布的消息数量
     private final Meter publishedMessages;
+    //已经消费的消息数量
     private final Meter consumedMessages;
+    //已经确认的消息数量
     private final Meter acknowledgedMessages;
+    //已经拒绝的消息数量
     private final Meter rejectedMessages;
 
 

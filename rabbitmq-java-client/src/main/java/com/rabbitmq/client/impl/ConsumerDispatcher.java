@@ -53,7 +53,7 @@ final class ConsumerDispatcher {
         this.workService = workService;
     }
 
-    /** Prepare for shutdown of all consumers on this channel */
+    /** Prepare for shutdown of all consumers on this channel  准备关闭此Channel上的所有Consumer*/
     public void quiesce() {
         // Prevent any more items being put on the queue (except the shutdown item)
         this.shuttingDown = true;
@@ -65,6 +65,8 @@ final class ConsumerDispatcher {
 
     public void handleConsumeOk(final Consumer delegate,
                                 final String consumerTag) {
+
+        //添加任务到该通道
         executeUnlessShuttingDown(
         new Runnable() {
             @Override

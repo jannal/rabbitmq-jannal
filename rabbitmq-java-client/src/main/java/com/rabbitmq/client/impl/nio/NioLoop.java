@@ -70,6 +70,7 @@ public class NioLoop implements Runnable {
             while (true && !Thread.currentThread().isInterrupted()) {
 
                 for (SelectionKey selectionKey : selector.keys()) {
+                    //获取SelectionKey上的附加对象
                     SocketChannelFrameHandlerState state = (SocketChannelFrameHandlerState) selectionKey.attachment();
                     if (state.getConnection() != null && state.getConnection().getHeartbeat() > 0) {
                         long now = System.currentTimeMillis();
@@ -103,6 +104,7 @@ public class NioLoop implements Runnable {
                     }
                 } else {
                     // we don't have to block, we need to select and clean cancelled keys before registration
+                    //此方法不会阻塞，会立即返回
                     select = selector.selectNow();
                 }
 
@@ -116,6 +118,7 @@ public class NioLoop implements Runnable {
                     registration = registrationIterator.next();
                     registrationIterator.remove();
                     int operations = registration.operations;
+                    //在通道上注册Selector
                     registration.state.getChannel().register(selector, operations, registration.state);
                 }
 
@@ -130,6 +133,7 @@ public class NioLoop implements Runnable {
                             continue;
                         }
 
+                        //可读事件
                         if (key.isReadable()) {
                             final SocketChannelFrameHandlerState state = (SocketChannelFrameHandlerState) key.attachment();
 

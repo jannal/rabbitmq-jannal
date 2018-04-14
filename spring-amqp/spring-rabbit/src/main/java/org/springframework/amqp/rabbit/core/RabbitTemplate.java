@@ -1426,6 +1426,7 @@ public class RabbitTemplate extends RabbitAccessor implements BeanFactoryAware, 
 		Connection connection = null;
 		if (isChannelTransacted()) {
 			resourceHolder = ConnectionFactoryUtils.getTransactionalResourceHolder(connectionFactory, true);
+			//获取通道
 			channel = resourceHolder.getChannel();
 			if (channel == null) {
 				ConnectionFactoryUtils.releaseResources(resourceHolder);
@@ -1453,6 +1454,7 @@ public class RabbitTemplate extends RabbitAccessor implements BeanFactoryAware, 
 				determineConfirmsReturnsCapability(connectionFactory);
 			}
 			if (this.confirmsOrReturnsCapable) {
+				//如果是发布确认模式，添加异步回调监听器
 				addListener(channel);
 			}
 			if (logger.isDebugEnabled()) {
@@ -1515,6 +1517,10 @@ public class RabbitTemplate extends RabbitAccessor implements BeanFactoryAware, 
 
 		Message messageToUse = message;
 		MessageProperties messageProperties = messageToUse.getMessageProperties();
+		/*设置头部标志位
+		 * mandatory标志位
+		 * 当mandatory标志位设置为true时，如果exchange根据自身类型和消息routeKey无法找到一个符合条件的queue，那么会调用     basic.return方法将消息返还给生产者；当mandatory设为false时，出现上述情形broker会直接将消息扔掉。
+		*/
 		if (mandatory) {
 			messageProperties.getHeaders().put(PublisherCallbackChannel.RETURN_CORRELATION_KEY, this.uuid);
 		}
@@ -1526,6 +1532,7 @@ public class RabbitTemplate extends RabbitAccessor implements BeanFactoryAware, 
 						: processor.postProcessMessage(messageToUse);
 			}
 		}
+		//设置发送确认(确认回调和channel必须是PublisherCallbackChannel才设置)
 		setupConfirm(channel, messageToUse, correlationData);
 		if (this.userIdExpression != null && messageProperties.getUserId() == null) {
 			String userId = this.userIdExpression.getValue(this.evaluationContext, messageToUse, String.class);
@@ -1533,6 +1540,7 @@ public class RabbitTemplate extends RabbitAccessor implements BeanFactoryAware, 
 				messageProperties.setUserId(userId);
 			}
 		}
+		//将消息属性转换为具体消息头
 		BasicProperties convertedMessageProperties = this.messagePropertiesConverter
 				.fromMessageProperties(messageProperties, this.encoding);
 		channel.basicPublish(exchange, routingKey, mandatory, convertedMessageProperties, messageToUse.getBody());

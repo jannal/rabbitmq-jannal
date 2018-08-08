@@ -11,9 +11,11 @@ buildscript {
 	}
 }
 
+/*
 plugins {
 	id "org.sonarqube" version "2.1"
 }
+*/
 
 description = 'Spring AMQP'
 
@@ -325,6 +327,7 @@ reference {
 
 reference.dependsOn asciidoctor
 
+/*
 sonarqube {
 	properties {
 		property "sonar.jacoco.reportPath", "${buildDir.name}/jacoco.exec"
@@ -336,6 +339,7 @@ sonarqube {
 		property "sonar.java.coveragePlugin", "jacoco"
 	}
 }
+*/
 
 task api(type: Javadoc) {
 	group = 'Documentation'

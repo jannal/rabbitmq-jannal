@@ -32,6 +32,7 @@ public class SocketChannelFrameHandler implements FrameHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SocketChannelFrameHandler.class);
 
+    //委托 SocketChannelFrameHandlerState 进行读写以及Socket选项设置
     private final SocketChannelFrameHandlerState state;
 
     public SocketChannelFrameHandler(SocketChannelFrameHandlerState state) {

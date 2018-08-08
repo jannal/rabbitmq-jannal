@@ -81,6 +81,7 @@ public class SocketChannelFrameHandlerState {
         this.channel = channel;
         this.readSelectorState = nioLoopsState.readSelectorState;
         this.writeSelectorState = nioLoopsState.writeSelectorState;
+        //写操作存入阻塞队列，数组形式保存数据
         this.writeQueue = new ArrayBlockingQueue<WriteRequest>(nioParams.getWriteQueueCapacity(), true);
         this.writeEnqueuingTimeoutInMs = nioParams.getWriteEnqueuingTimeoutInMs();
         this.sslEngine = sslEngine;
@@ -133,9 +134,11 @@ public class SocketChannelFrameHandlerState {
 
     private void sendWriteRequest(WriteRequest writeRequest) throws IOException {
         try {
+            //将写操作入队列，offer当队列满了，返回false不会阻塞
             boolean offered = this.writeQueue.offer(writeRequest, writeEnqueuingTimeoutInMs, TimeUnit.MILLISECONDS);
             if(offered) {
                 this.writeSelectorState.registerFrameHandlerState(this, SelectionKey.OP_WRITE);
+                //注册了写事件，让写事件优先级变高，此时通过wakeup()唤醒
                 this.readSelectorState.selector.wakeup();
             } else {
                 throw new IOException("Frame enqueuing failed");

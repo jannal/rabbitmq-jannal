@@ -39,6 +39,7 @@ public class NioLoopContext {
 
     void initStateIfNecessary() throws IOException {
         if (this.readSelectorState == null) {
+            //Selector.open() 创建一个Selector
             this.readSelectorState = new SelectorHolder(Selector.open());
             this.writeSelectorState = new SelectorHolder(Selector.open());
 

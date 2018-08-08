@@ -69,6 +69,11 @@ public class NioLoop implements Runnable {
         try {
             while (true && !Thread.currentThread().isInterrupted()) {
 
+
+                /**
+                 * selector.selectedKeys();表示获取就绪的SelectionKey(只有当有就绪的Channel才应该调用此方法)
+                 * selector.keys() 表示所有的SelectionKey集
+                 */
                 for (SelectionKey selectionKey : selector.keys()) {
                     //获取SelectionKey上的附加对象
                     SocketChannelFrameHandlerState state = (SocketChannelFrameHandlerState) selectionKey.attachment();
@@ -92,6 +97,10 @@ public class NioLoop implements Runnable {
                 int select;
                 if (!writeRegistered && registrations.isEmpty() && writeRegistrations.isEmpty()) {
                     // we can block, registrations will call Selector.wakeup()
+                    /**
+                     *  当注册的事件到达时，方法返回；返回值表示有多少个channel就绪
+                     */
+
                     select = selector.select(1000);
                     if (selector.keys().size() == 0) {
                         // we haven't been doing anything for a while, shutdown state
@@ -112,13 +121,14 @@ public class NioLoop implements Runnable {
 
                 // registrations should be done after select,
                 // once the cancelled keys have been actually removed
+                //这里遍历所有就绪的SelectionKey,因为在sendWriteRequet()和startReading()时都注册了关联，或者说后面的wakeUp其实是无效的调用
                 SocketChannelRegistration registration;
                 Iterator<SocketChannelRegistration> registrationIterator = registrations.iterator();
                 while (registrationIterator.hasNext()) {
                     registration = registrationIterator.next();
                     registrationIterator.remove();
                     int operations = registration.operations;
-                    //在通道上注册Selector
+                    //在通道上注册Selector，这有些疑惑？既然在sendWriteRequet()和startReading()唤醒，那之前应该注册了，这又重新注册一遍？？
                     registration.state.getChannel().register(selector, operations, registration.state);
                 }
 
@@ -127,6 +137,7 @@ public class NioLoop implements Runnable {
                     Iterator<SelectionKey> iterator = readyKeys.iterator();
                     while (iterator.hasNext()) {
                         SelectionKey key = iterator.next();
+                        // 删除已选的key,以防重复处理
                         iterator.remove();
 
                         if (!key.isValid()) {
@@ -138,6 +149,7 @@ public class NioLoop implements Runnable {
                             final SocketChannelFrameHandlerState state = (SocketChannelFrameHandlerState) key.attachment();
 
                             try {
+                                //如果通道已经关闭，此时取消关联(Channel与Selector的注册关系),取消关联不是立即生效
                                 if (!state.getChannel().isOpen()) {
                                     key.cancel();
                                     continue;
@@ -150,6 +162,7 @@ public class NioLoop implements Runnable {
 
                                 DataInputStream inputStream = state.inputStream;
 
+                                //Channel数据读入到Buffer中，这里只读一次，不会做hasRemaining()的判断
                                 state.prepareForReadSequence();
 
                                 while (state.continueReading()) {
@@ -240,12 +253,14 @@ public class NioLoop implements Runnable {
                                     written++;
                                 }
                                 outputStream.flush();
+                                //如果有新的写请求入队，此时取消注册
                                 if (!state.getWriteQueue().isEmpty()) {
                                     cancelKey = true;
                                 }
                             } catch (Exception e) {
                                 handleIoError(state, e);
                             } finally {
+                                //清空写buffer
                                 state.endWriteSequence();
                                 if (cancelKey) {
                                     key.cancel();

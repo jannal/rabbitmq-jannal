@@ -36,6 +36,7 @@ public class SelectorHolder {
 
     public void registerFrameHandlerState(SocketChannelFrameHandlerState state, int operations) {
         registrations.add(new SocketChannelRegistration(state, operations));
+        //唤醒阻塞在selector.select()或者selector.select(timeout)上的线程
         selector.wakeup();
     }
 }

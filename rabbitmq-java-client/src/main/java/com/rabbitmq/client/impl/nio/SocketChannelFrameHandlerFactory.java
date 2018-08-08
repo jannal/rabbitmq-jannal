@@ -44,8 +44,10 @@ public class SocketChannelFrameHandlerFactory extends AbstractFrameHandlerFactor
 
     private final Lock stateLock = new ReentrantLock();
 
+
     private final AtomicLong globalConnectionCount = new AtomicLong();
 
+    //nio 事件循环上下文
     private final List<NioLoopContext> nioLoopContexts;
 
     public SocketChannelFrameHandlerFactory(int connectionTimeout, NioParams nioParams, boolean ssl, SSLContext sslContext)
@@ -74,6 +76,7 @@ public class SocketChannelFrameHandlerFactory extends AbstractFrameHandlerFactor
 
             SocketAddress address = new InetSocketAddress(addr.getHost(), portNumber);
             channel = SocketChannel.open();
+            //设置为阻塞模式
             channel.configureBlocking(true);
             if(nioParams.getSocketChannelConfigurator() != null) {
                 nioParams.getSocketChannelConfigurator().configure(channel);
@@ -88,15 +91,17 @@ public class SocketChannelFrameHandlerFactory extends AbstractFrameHandlerFactor
                     throw new SSLException("TLS handshake failed");
                 }
             }
-
+            //设置通道为非阻塞模式
             channel.configureBlocking(false);
 
             // lock
             stateLock.lock();
             NioLoopContext nioLoopContext = null;
             try {
+                //分配连接到指定的事件循环中
                 long modulo = globalConnectionCount.getAndIncrement() % nioParams.getNbIoThreads();
                 nioLoopContext = nioLoopContexts.get((int) modulo);
+                //启动事件循环
                 nioLoopContext.initStateIfNecessary();
                 SocketChannelFrameHandlerState state = new SocketChannelFrameHandlerState(
                     channel,
@@ -104,6 +109,7 @@ public class SocketChannelFrameHandlerFactory extends AbstractFrameHandlerFactor
                     nioParams,
                     sslEngine
                 );
+                //注册读事件
                 state.startReading();
                 SocketChannelFrameHandler frameHandler = new SocketChannelFrameHandler(state);
                 return frameHandler;

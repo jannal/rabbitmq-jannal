@@ -184,7 +184,7 @@ public class SocketFrameHandler implements FrameHandler {
         // see https://github.com/rabbitmq/rabbitmq-java-client/issues/194
         /**
          * TODO 此处用途还需要思考一下，避免socket写阻塞的原因，以及为什么通过开启线程来避免死锁？？？？ by jannal
-         * 有时间再看看比人遇见的问题:
+         * TODO 有时间再看看别人遇见的问题:
          * http://rabbitmq.1065348.n5.nabble.com/Long-timeout-if-server-host-becomes-unreachable-td30275.html
           */
 

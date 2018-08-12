@@ -1,0 +1,45 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/rabbit
+           http://www.springframework.org/schema/rabbit/spring-rabbit.xsd
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="true" />
+        <property name="locations">
+            <list>
+                <value>classpath*:env.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--对应ConnectionFactory类-->
+    <rabbit:connection-factory id="connectionFactory" host="${rabbitmq.host}" username="${rabbitmq.username}"
+        password="${rabbitmq.password}" port="${rabbitmq.port}" virtual-host="${rabbitmq.vhost}"
+                               requested-heartbeat="20"    />
+
+    <rabbit:template id="amqpTemplate" connection-factory="connectionFactory" exchange="${rabbitmq.exchange}"
+         routing-key="${rabbitmq.routkey}"  />
+
+    <!--账号-->
+    <rabbit:admin connection-factory="connectionFactory" />
+
+    <!--队列名
+    exclusive 如果设置为true，队列将变成私有的，此时只有你的应用可以消费队列消息，如果想限制一个队列只有一个消费者时很有用
+    -->
+    <rabbit:queue name="${rabbitmq.queue}" durable="true" auto-delete="false" exclusive="false"/>
+
+
+    <!--配置topic类型exchange-->
+    <rabbit:topic-exchange name="${rabbitmq.exchange}">
+        <rabbit:bindings>
+            <rabbit:binding queue="${rabbitmq.queue}" pattern="*.#"  />
+        </rabbit:bindings>
+    </rabbit:topic-exchange>
+
+
+
+
+</beans>

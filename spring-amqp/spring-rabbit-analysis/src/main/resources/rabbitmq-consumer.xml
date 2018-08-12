@@ -1,0 +1,44 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:rabbit="http://www.springframework.org/schema/rabbit"
+       xsi:schemaLocation="http://www.springframework.org/schema/rabbit
+           http://www.springframework.org/schema/rabbit/spring-rabbit.xsd
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="true" />
+        <property name="locations">
+            <list>
+                <value>classpath*:env.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <!--对应ConnectionFactory类-->
+    <rabbit:connection-factory id="connectionFactory" host="${rabbitmq.host}" username="${rabbitmq.username}"
+        password="${rabbitmq.password}" port="${rabbitmq.port}" virtual-host="${rabbitmq.vhost}"
+                               requested-heartbeat="20" />
+    <!--账号-->
+    <rabbit:admin connection-factory="connectionFactory" />
+
+
+    <!--配置消费端监听对应SimpleMessageListenerContainer-->
+    <!--配置参考https://docs.spring.io/spring-amqp/docs/1.6.11.RELEASE/reference/html/_reference.html#containerAttributes-->
+    <!--acknowledge属性, 默认为auto, 即消费者成功处理消息后必须有个应答, 如果消费者程序发生异常或者宕机, 消息会被重新放回队列-->
+    <!--concurrency 如果设置为1 表示启动一个线程消费-->
+    <rabbit:listener-container connection-factory="connectionFactory" acknowledge="auto"
+                               max-concurrency="1000" concurrency="100"
+                               message-converter="messageConverter" prefetch="1"    >
+        <rabbit:listener ref="commonMessageListener"  queue-names="${rabbitmq.queue}"   />
+
+    </rabbit:listener-container>
+
+    <bean id="commonMessageListener" class="com.jannal.mq.consumer.CommonMessageListener" />
+
+    <bean id="messageConverter" class="org.springframework.amqp.support.converter.Jackson2JsonMessageConverter"></bean>
+
+
+
+
+</beans>

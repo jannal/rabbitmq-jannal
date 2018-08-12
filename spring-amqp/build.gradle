@@ -293,6 +293,30 @@ project('spring-rabbit-test') {
 }
 
 
+//by jannal
+project('spring-rabbit-analysis') {
+	description = 'Spring Rabbit Test Support'
+
+	dependencies {
+
+		compile project(":spring-rabbit")
+		compile ("junit:junit:$junitVersion") {
+			exclude group: 'org.hamcrest', module: 'hamcrest-core'
+		}
+		compile "org.hamcrest:hamcrest-all:$hamcrestVersion"
+		compile ("org.mockito:mockito-core:$mockitoVersion") {
+			exclude group: 'org.hamcrest', module: 'hamcrest-core'
+		}
+		testCompile project(":spring-rabbit").sourceSets.test.output
+		testCompile project(":spring-rabbit-junit")
+
+	}
+
+}
+
+
+
+
 apply plugin: org.asciidoctor.gradle.AsciidoctorPlugin
 
 asciidoctor {

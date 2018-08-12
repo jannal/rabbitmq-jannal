@@ -4,3 +4,5 @@ include 'spring-amqp'
 include 'spring-rabbit'
 include 'spring-rabbit-junit'
 include 'spring-rabbit-test'
+include 'spring-rabbit-analysis'
+

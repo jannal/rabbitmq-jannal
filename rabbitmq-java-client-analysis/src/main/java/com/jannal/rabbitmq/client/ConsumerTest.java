@@ -27,20 +27,30 @@ public class ConsumerTest {
 
 
             final Channel channel =conn.createChannel();
-            //basicConsume是一个同步方法
-            String consumerTag = channel.basicConsume("jannal.queue", true, "consumerTag", new DefaultConsumer(channel) {
+            //设置客户端最多接收未被ack的消息的个数
+            channel.basicQos(27);
+
+            //basicConsume是一个同步方法，这里设置不自动确认
+            String consumerTag = channel.basicConsume("jannal.queue", false, "consumerTag", new DefaultConsumer(channel) {
                 @Override
                 public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
                     super.handleDelivery(consumerTag, envelope, properties, body);
                     String routingKey = envelope.getRoutingKey();
                     String contentType = properties.getContentType();
+
                     long deliveryTag = envelope.getDeliveryTag();
                     // (process the message components here ...)
-                    ///channel.basicAck(deliveryTag, false);
-                    System.out.print(new String(body, "utf-8"));
+                    channel.basicAck(deliveryTag, true);
+                    System.out.println(new String(body, "utf-8"));
                 }
             });
-            System.out.print("consumerTag:"+consumerTag);
+
+            System.out.println("consumerTag:"+consumerTag);
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (TimeoutException e) {

@@ -38,7 +38,10 @@ public class MandatoryTest {
             //String queueName = channel.queueDeclare().getQueue();
             //channel.queueBind("jannal.queue", "jannal.exchange", "*.#");
             byte[] messageBodyBytes = "Hello, world!".getBytes();
-            channel.basicPublish("jannal.exchange", "*.#", true,null, messageBodyBytes);
+
+
+            //指定一个存在的exchange，但是没有关联队列
+            channel.basicPublish("jannal.exchange.noqueue", "*.#", true,null, messageBodyBytes);
 
             //生产者没有成功的将消息路由到队列，此时rabbitmq会响应Basic.Return命令，客户端通过ReturnListener监听
             channel.addReturnListener(new ReturnListener() {
@@ -52,6 +55,11 @@ public class MandatoryTest {
                     System.out.println("发送的信息:"+bodyStr);
                 }
             });
+            try {
+                Thread.sleep(20000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
         } catch (IOException e) {
             e.printStackTrace();

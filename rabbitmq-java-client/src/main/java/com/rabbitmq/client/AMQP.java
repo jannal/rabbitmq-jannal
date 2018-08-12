@@ -1086,6 +1086,7 @@ public interface AMQP {
                 }
             }
         }
+        //Basic.Consume是推送模型
         public interface Consume extends Method {
             int getTicket();
             String getQueue();
@@ -1622,14 +1623,14 @@ public interface AMQP {
 
     public static class BasicProperties extends com.rabbitmq.client.impl.AMQBasicProperties {
         private String contentType;
-        private String contentEncoding;
+        private String contentEncoding;//消息体使用压缩或编码
         private Map<String,Object> headers;
-        private Integer deliveryMode;
-        private Integer priority;
-        private String correlationId;
+        private Integer deliveryMode;//消息写入磁盘或内存队列，1表示内存，2表示持久化到硬盘
+        private Integer priority;//优先级0-9之间的整数
+        private String correlationId;//唯一表示消息响应
         private String replyTo;
-        private String expiration;
-        private String messageId;
+        private String expiration;//表示消息过期，如果把一个已经过期的消息发布到server，消息不会被路由到任何队列，而是直接丢弃
+        private String messageId;//唯一标识消息
         private Date timestamp;
         private String type;
         private String userId;

@@ -71,7 +71,7 @@ private <T> T execute(final ChannelCallback<T> action, final ConnectionFactory c
 		Channel channel = resourceHolder.getChannel();
 		
 		if (this.confirmsOrReturnsCapable == null) {
-		//判断当前的连接工厂是否是PublisherCallbackChannelConnectionFactory,如果是是不是发布确认模式
+		//判断当前的连接工厂是否是PublisherCallbackChannelConnectionFactory,如果是，是不是发布确认模式
 			if (getConnectionFactory() instanceof PublisherCallbackChannelConnectionFactory) {
 				PublisherCallbackChannelConnectionFactory pcccf =
 						(PublisherCallbackChannelConnectionFactory) getConnectionFactory();

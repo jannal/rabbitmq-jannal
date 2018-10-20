@@ -29,11 +29,12 @@ final public class ConsumerWorkService {
     private static final int DEFAULT_NUM_THREADS = Runtime.getRuntime().availableProcessors() * 2;
     private final ExecutorService executor;
     private final boolean privateExecutor;
-    //每一个通道使用独立的线程执行
+    //Channel与具体任务的关系
     private final WorkPool<Channel, Runnable> workPool;
     private final int shutdownTimeout;
 
     public ConsumerWorkService(ExecutorService executor, ThreadFactory threadFactory, int shutdownTimeout) {
+        //如果没有自定义线程就使用默认的线程池
         this.privateExecutor = (executor == null);
         this.executor = (executor == null) ? Executors.newFixedThreadPool(DEFAULT_NUM_THREADS, threadFactory)
                                            : executor;
@@ -92,6 +93,7 @@ final public class ConsumerWorkService {
 
         @Override
         public void run() {
+            //一个线程每次执行16个任务
             int size = MAX_RUNNABLE_BLOCK_SIZE;
             List<Runnable> block = new ArrayList<Runnable>(size);
             try {
@@ -102,6 +104,7 @@ final public class ConsumerWorkService {
                         runnable.run();
                     }
                 } finally {
+                    //任务执行完成后清理,如果还有任务在队列里，则继续使用线程池执行(递归)
                     if (ConsumerWorkService.this.workPool.finishWorkBlock(key)) {
                         ConsumerWorkService.this.executor.execute(new WorkPoolRunnable());
                     }

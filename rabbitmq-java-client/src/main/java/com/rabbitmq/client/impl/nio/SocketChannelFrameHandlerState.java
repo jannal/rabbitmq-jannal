@@ -79,7 +79,9 @@ public class SocketChannelFrameHandlerState {
 
     public SocketChannelFrameHandlerState(SocketChannel channel, NioLoopContext nioLoopsState, NioParams nioParams, SSLEngine sslEngine) {
         this.channel = channel;
+        //读Selector
         this.readSelectorState = nioLoopsState.readSelectorState;
+        //写Selector
         this.writeSelectorState = nioLoopsState.writeSelectorState;
         //写操作存入阻塞队列，数组形式保存数据
         this.writeQueue = new ArrayBlockingQueue<WriteRequest>(nioParams.getWriteQueueCapacity(), true);

@@ -1,13 +1,22 @@
 [TOC]
 
+<!--20181020-->
+
+# RabbitMQ-java-client版本
+
+1. `com.rabbitmq:amqp-client:4.3.0`
+2. `RabbitMQ`版本声明: 3.6.15
+
+
 # BlockingCell
-1. `BlockingCell`代码文档描述为”简单的一次性IPC机制“，个人认为是一个`Future`对象，大多数长连接里异步处理获取响应值都会采用`Future`模式。
-2. 源码中文注释[BlockingCell](../rabbitmq-java-client/src/main/java/com/rabbitmq/utility/BlockingCell.java)
-3. uml关联
+
+1. [BlockingCell](https://gitee.com/jannal/rabbitmq/blob/master/rabbitmq-java-client/src/main/java/com/rabbitmq/utility/BlockingCell.java)，代码文档注释描述为”简单的一次性IPC机制“，其实就是一个`Future`对象，大多数长连接里异步处理获取响应值都会采用`Future`模式。
+2. uml关联
    
-   ![](image/15190336948093.jpg)
+   ![](https://gitee.com/jannal/images/raw/master/RabbitMQ/15190336948093.jpg)
 
 ## BlockingCell源码分析
+
  1. 完整代码，我们从代码结构来看其实就是一个Future  
    
     ```java
@@ -162,6 +171,7 @@
     ```
 
 ## ValueOrException
+
 1. `ValueOrException`值与异常的包装。
     
     ```java
@@ -200,7 +210,8 @@
     }
     ```
     
-## `RpcContinuation`
+## RpcContinuation
+
 1.  rpc配置接口
     
     ```java
@@ -252,6 +263,7 @@
 # 扩展
 
 ## 自己写一个
+
 1. 这里是我之前学习netty时候写的一个Future对象以及实现，供参考
 2. `ResponseFuture接口`
    

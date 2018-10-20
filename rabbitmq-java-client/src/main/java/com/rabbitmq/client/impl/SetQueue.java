@@ -47,6 +47,7 @@ public class SetQueue<T> {
             return false;
         }
         this.members.add(item);
+        //添加到linkedList队列的尾部
         this.queue.offer(item);
         return true;
     }

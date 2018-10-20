@@ -54,7 +54,7 @@ public class WorkPool<K, W> {
     //默认最大队列长度
     private static final int MAX_QUEUE_LENGTH = 1000;
 
-    /** An injective queue of <i>ready</i> clients. 就绪队列*/
+    /** An injective queue of <i>ready</i> clients. 就绪的clients集合*/
     private final SetQueue<K> ready = new SetQueue<K>();
     /** The set of clients which have work <i>in progress</i>. 正在处理的client集合*/
     private final Set<K> inProgress = new HashSet<K>();
@@ -140,6 +140,7 @@ public class WorkPool<K, W> {
             if (nextKey != null) {
                 //获取Channel对应的任务队列
                 VariableLinkedBlockingQueue<W> queue = this.pool.get(nextKey);
+                //连续从queue取中size个元素，并将元素保存到to集合中
                 drainTo(queue, to, size);
             }
             return nextKey;
@@ -188,6 +189,7 @@ public class WorkPool<K, W> {
             }
 
             synchronized (this) {
+                //如果Channel处于休眠状态，转换为准备就绪状态
                 if (isDormant(key)) {
                     dormantToReady(key);
                     return true;
@@ -246,6 +248,7 @@ public class WorkPool<K, W> {
 
     /* Basic work selector and state transition step */
     private K readyToInProgress() {
+        //从SetQueue的队列头获取一个Channel，并从就绪集合转移到处理集合
         K key = this.ready.poll();
         if (key != null) {
             this.inProgress.add(key);

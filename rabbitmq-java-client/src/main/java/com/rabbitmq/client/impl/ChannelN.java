@@ -1221,11 +1221,11 @@ public class ChannelN extends AMQChannel implements com.rabbitmq.client.Channel 
     /**
      * 1.启动消费者，调用消费者的handlerConsumerOk
      * 2.queue 队列名称
-     * 3. autoAck 自动ack
+     * 3.autoAck 自动ack
      *
      * 4.consumerTag 不同的订阅采用Consumer Tag作为区分，在同一个Channel中的Consumer也需要通过唯一的Consumer tag以区分
      * 5.noLocal 如果为true，表示不能将同一个Connection中生产发送的消息传送给这个Connection中的消费者
-     * 6. Consumer 回调接口
+     * 6.Consumer 回调接口
      */
     /** Public API - {@inheritDoc} */
     @Override

@@ -1,11 +1,20 @@
 [TOC]
 
+<!--20181014-->
+
+# 版本声明
+
+1. `com.rabbitmq:amqp-client:4.3.0`
+2. `RabbitMQ`版本声明: 3.6.15
+
 # Connection
-1. 这里的连接其实就表示的是TCP/IP socket连接，一个`Connection`有多个`Channel`,意味`Connection`会被设计为长连接，并且每个Channel一定有一个唯一标识，客户端请求和服务端响应都会携带这个标识，以区分是哪个通道。
+
+1. 这里的连接其实就表示的是TCP/IP socket连接，一个`Connection`有多个`Channel`,意味`Connection`会被设计为长连接，并且每个`Channel`一定有一个唯一标识，客户端请求和服务端响应都会携带这个标识，以区分是哪个通道。
 
 
 ## 连接过程分析
-1. client打开与服务器的TCP/IP连接并发送一个协议头(protocol header).这只是client发送的数据，而不是作为方法格式的数据.
+
+1. client打开与服务器的TCP/IP连接并发送一个协议头(`protocol header`).这只是client发送的数据，而不是作为方法格式的数据.
 2. server使用其协议版本和其它属性，包括它支持安全机制列表(Start方法)进行响应.
 3. client选择一种安全机制(Start-Ok).
 4. server开始认证过程, 它使用SASL的质询-响应模型(challenge-response model). 它向客户端发送一个质询(Secure).
@@ -19,42 +28,45 @@ server 重复质询(Secure) 或转到协商,发送一系列参数，如最大帧
 11. 另一个节点对连接结束握手(Close-Ok).
 12. server 和  client关闭它们的套接字连接.
 13. 连接流转图
-![](image/连接流转图.jpg)
+![](https://gitee.com/jannal/images/raw/master/RabbitMQ/连接流转图.jpg)
 
 
 
 
 ## 连接过程抓包分析
+
 1. 整个连接过程,我们从抓包结果来分析，只关注`AMQP`协议即可
-![](image/15191878358841.jpg)
+![](https://gitee.com/jannal/images/raw/master/RabbitMQ/15191878358841.jpg)
 
 
 2.  第一步客户端发送`Protocol-Hearder`
-![](image/15191893844432.jpg)
+![](https://gitee.com/jannal/images/raw/master/RabbitMQ/15191893844432.jpg)
 
 3. 服务端响应`Connection.start`
-![](image/15191894902268.jpg)
+![](https://gitee.com/jannal/images/raw/master/RabbitMQ/15191894902268.jpg)
 
 4. 客户端发送`Connection.Start-Ok`
-![](image/15191898399533.jpg)
+![](https://gitee.com/jannal/images/raw/master/RabbitMQ/15191898399533.jpg)
 5. 服务端发送`Connection.Tune`
-![](image/15191899493790.jpg)
+![](https://gitee.com/jannal/images/raw/master/RabbitMQ/15191899493790.jpg)
 6. 客户端发送`Connection.Tune-Ok`
-![](image/15191899994708.jpg)
+![](https://gitee.com/jannal/images/raw/master/RabbitMQ/15191899994708.jpg)
 7. 客户端发送`Connection.Open`
-![](image/15191900878332.jpg)
+![](https://gitee.com/jannal/images/raw/master/RabbitMQ/15191900878332.jpg)
 8. 服务端发送`Connection.Open-Ok`
-![](image/15191902964647.jpg)
+![](https://gitee.com/jannal/images/raw/master/RabbitMQ/15191902964647.jpg)
 
 
 ## 源码分析
+
 1. uml图
-![](image/15191986539503.jpg)
+![](https://gitee.com/jannal/images/raw/master/RabbitMQ/15191986539503.jpg)
 2. 创建连接时序图
-![](image/newConnection.jpg)
+![](https://gitee.com/jannal/images/raw/master/RabbitMQ/newConnection.jpg)
 
 ### ConnectionFactory
-1. 创建连接的工厂[ConnectionFactory](../rabbitmq-java-client/src/main/java/com/rabbitmq/client/ConnectionFactory.java),包含创建连接的一些必备参数。
+
+1. 创建连接的工厂[ConnectionFactory](https://gitee.com/jannal/rabbitmq/blob/master/rabbitmq-java-client/src/main/java/com/rabbitmq/client/ConnectionFactory.java),包含创建连接的一些必备参数。
 2. 核心方法`newConnection()`
     
     ```java
@@ -112,7 +124,7 @@ server 重复质询(Secure) 或转到协商,发送一系列参数，如最大帧
        
     ```
         
-3. `createFrameHandlerFactory`, `FrameHandlerFactory`详细源码参考[4.Frame与FrameHandler](4.Frame与FrameHandler.md)
+3. `createFrameHandlerFactory`, `FrameHandlerFactory`
      
      ```java 
        protected synchronized FrameHandlerFactory createFrameHandlerFactory() throws IOException {
@@ -134,7 +146,7 @@ server 重复质询(Secure) 或转到协商,发送一系列参数，如最大帧
     
 ### AMQConnection分析
     
-1. [AMQConnection](../rabbitmq-java-client/src/main/java/com/rabbitmq/client/impl/AMQConnection.java)详细注释
+1. [AMQConnection](https://gitee.com/jannal/rabbitmq/blob/master/rabbitmq-java-client/src/main/java/com/rabbitmq/client/impl/AMQConnection.java)详细注释
 2. 起来启动的核心代码
 
     ```java
@@ -315,12 +327,9 @@ server 重复质询(Secure) 或转到协商,发送一系列参数，如最大帧
         
     ```
 
-### AutorecoveringConnection 分析
-1. TODO 待续...
 
-## 启动连接的代码
-1. 客户端发送连接请求协议`Start`,服务端响应
-![](image/15190401019869.jpg)
+
+
 
 
 

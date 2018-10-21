@@ -146,6 +146,7 @@ public abstract class AMQChannel extends ShutdownNotifierComponent {
             RpcContinuation nextOutstandingRpc = nextOutstandingRpc();
             // the outstanding RPC can be null when calling Channel#asyncRpc
             if(nextOutstandingRpc != null) {
+                //读完服务端响应的Frame，给Future赋值
                 nextOutstandingRpc.handleCommand(command);
                 markRpcFinished();
             }
@@ -156,10 +157,12 @@ public abstract class AMQChannel extends ShutdownNotifierComponent {
     {
         synchronized (_channelMutex) {
             boolean waitClearedInterruptStatus = false;
+            //_activeRpc表示的是当前未完成的RPC请求，如果不为空，则一直等待
             while (_activeRpc != null) {
                 try {
                     _channelMutex.wait();
                 } catch (InterruptedException e) {
+                    //为什么不直接在这里调用重置中断状态?? 加个变量不是多此一举吗？
                     waitClearedInterruptStatus = true;
                 }
             }
@@ -222,6 +225,8 @@ public abstract class AMQChannel extends ShutdownNotifierComponent {
     private AMQCommand privateRpc(Method m)
         throws IOException, ShutdownSignalException
     {
+
+        //封装BlockingValueOrException
         SimpleBlockingRpcContinuation k = new SimpleBlockingRpcContinuation();
         rpc(m, k);
         // At this point, the request method has been sent, and we

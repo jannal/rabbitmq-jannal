@@ -4,7 +4,7 @@
 
 # 版本声明
 
-1. `com.rabbitmq:amqp-client:4.3.0`
+1. `com.rabbitmq:amqp-client:4.0.3`
 2. `RabbitMQ`版本声明: 3.6.15
 
 # Connection
@@ -147,7 +147,7 @@ server 重复质询(Secure) 或转到协商,发送一系列参数，如最大帧
 ### AMQConnection分析
     
 1. [AMQConnection](https://gitee.com/jannal/rabbitmq/blob/master/rabbitmq-java-client/src/main/java/com/rabbitmq/client/impl/AMQConnection.java)详细注释
-2. 起来启动的核心代码
+2. 启动的核心代码
 
     ```java
          /**

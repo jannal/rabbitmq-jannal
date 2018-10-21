@@ -650,6 +650,7 @@ public class AMQConnection extends ShutdownNotifierComponent implements Connecti
             if (frame.type == AMQP.FRAME_HEARTBEAT) {
                 // Ignore it: we've already just reset the heartbeat counter.
             } else {
+                // 0号Channel表示Connection全局连接(即TCP连接)中的所有Frame，1-65535表示的是特定Channel的帧
                 if (frame.channel == 0) { // the special channel
                     _channel0.handleFrame(frame);
                 } else {

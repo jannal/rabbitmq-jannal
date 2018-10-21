@@ -6,7 +6,7 @@
 
 # RabbitMQ-java-client版本
 
-1. `com.rabbitmq:amqp-client:4.3.0`
+1. `com.rabbitmq:amqp-client:4.0.3`
 2. `RabbitMQ`版本声明: 3.6.15
 
 

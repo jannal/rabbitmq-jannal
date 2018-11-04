@@ -1,26 +1,29 @@
 [TOC]
 
+<!--20181104-->
 
 # 声明
 
-1. Queue声明、exchange声明、绑定等，这些都是通过同步调用
+1. Queue声明、exchange声明、bind等，这些都是通过同步RPC调用
 
     ```java
     
               
-                channel.queueDeclare(queueName, durable, exclusive, autoDelete, null);
-                channel.exchangeDeclare(exchange, "direct", true);  
-                channel.queueBind(queueName, exchange, bindingKey);
+        channel.queueDeclare(queueName, durable, exclusive, autoDelete, null);
+        channel.exchangeDeclare(exchange, "direct", true);  
+        channel.queueBind(queueName, exchange, bindingKey);
     ```
 
 
-## 发送数据
+## 发送声明数据
 
 1. `queueDeclare`:声明队列，调用的方法嵌套比较多
-
-![rp-w489](media/rpc.jpg)
+    ![rp-w489](https://gitee.com/jannal/images/raw/master/RabbitMQ/rpc.jpg)
 
 2. 核心调用流程
+    ```
+     校验队列名长度——>构建Declare数据——>RPC同步阻塞调用，直到响应数据返回
+    ```
 
 3. `validateQueueNameLength`:从这里可以看到，队列名字的长度最大为255
     
@@ -125,10 +128,10 @@
     ```
     
     
-## 读取响应数据分析
+## 读取RPC响应数据分析
 
 1. 流程
-![rp-w489](media/read.jpg)
+    ![rp-w489](https://gitee.com/jannal/images/raw/master/RabbitMQ/read.jpg)
 
 2. ` connection.startMainLoop();`
 
